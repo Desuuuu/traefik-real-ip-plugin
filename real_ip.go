@@ -49,7 +49,8 @@ func New(ctx context.Context, next http.Handler, config *Config, name string) (h
 			continue
 		}
 
-		if len(rc.ProxyCIDRs) > 0 {
+		switch {
+		case len(rc.ProxyCIDRs) > 0:
 			cidrs := make([]*net.IPNet, 0, len(rc.ProxyCIDRs))
 
 			for _, c := range rc.ProxyCIDRs {
@@ -65,15 +66,14 @@ func New(ctx context.Context, next http.Handler, config *Config, name string) (h
 				Header: rc.Header,
 				CIDRs:  cidrs,
 			})
-		} else {
-			count := rc.ProxyCount
-			if count < 1 {
-				count = 1
-			}
-
+		case rc.ProxyCount > 0:
 			ri.retrievers = append(ri.retrievers, &ProxyCountRetriever{
 				Header: rc.Header,
-				Count:  count,
+				Count:  rc.ProxyCount,
+			})
+		default:
+			ri.retrievers = append(ri.retrievers, &HeaderRetriever{
+				Header: rc.Header,
 			})
 		}
 	}

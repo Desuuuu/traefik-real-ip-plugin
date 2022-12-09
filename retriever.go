@@ -10,6 +10,24 @@ type Retriever interface {
 	Retrieve(http.Header) net.IP
 }
 
+type HeaderRetriever struct {
+	Header string
+}
+
+func (r *HeaderRetriever) Retrieve(headers http.Header) net.IP {
+	for _, value := range headers.Values(r.Header) {
+		if value == "" {
+			continue
+		}
+
+		if ip := net.ParseIP(strings.TrimSpace(value)); ip != nil {
+			return ip
+		}
+	}
+
+	return nil
+}
+
 type ProxyCountRetriever struct {
 	Header string
 	Count  int

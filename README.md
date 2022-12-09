@@ -4,9 +4,9 @@
 
 Traefik plugin to retrieve client IPs. Supports retrieving the IP from and writing the result to arbitrary headers.
 
-Headers are parsed with the same format as the `X-Forwarded-For` header, based either on a list or a count of trusted proxies.
+If a list or a count of trusted proxies is specified, the header is parsed with the same format as the `X-Forwarded-For` header (`1.2.3.4, 1.2.3.5, ...`). Otherwise, the entire header is parsed as an IP.
 
-The value of the configured destination headers is set to the first valid IP found.
+The first valid IP retrieved is written to the configured destination headers.
 
 ## Traefik static configuration
 
@@ -15,7 +15,7 @@ experimental:
   plugins:
     realip:
       moduleName: github.com/Desuuuu/traefik-real-ip-plugin
-      version: v1.0.0
+      version: v1.0.1
 ```
 
 ## Dynamic configuration
