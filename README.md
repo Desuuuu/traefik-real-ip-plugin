@@ -33,7 +33,7 @@ http:
               proxyCIDRs:
                 - "203.0.113.195/24"
           headers:
-            - "X-Real-IP"
+            - X-Real-IP
 ```
 
 ### Trusted count
