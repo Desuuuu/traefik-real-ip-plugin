@@ -83,13 +83,13 @@ func New(ctx context.Context, next http.Handler, config *Config, name string) (h
 
 func (ri *RealIP) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	for _, retriever := range ri.retrievers {
-		ip := retriever.Retrieve(r.Header)
-		if ip == nil {
-			continue
-		}
+		if ip := retriever.Retrieve(r.Header); ip != nil {
+			ipStr := ip.String()
 
-		for _, header := range ri.headers {
-			r.Header.Set(header, ip.String())
+			for _, header := range ri.headers {
+				r.Header.Set(header, ipStr)
+			}
+			break
 		}
 	}
 
