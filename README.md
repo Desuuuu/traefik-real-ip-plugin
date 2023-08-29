@@ -4,7 +4,7 @@
 
 Traefik plugin to retrieve client IPs. Supports retrieving the IP from and writing the result to arbitrary headers.
 
-If a list or a count of trusted proxies is specified, the header is parsed with the same format as the `X-Forwarded-For` header (`1.2.3.4, 1.2.3.5, ...`). Otherwise, the entire header is parsed as an IP.
+If a depth or a list of excluded CIDRs is specified, the header is parsed with the same format as the `X-Forwarded-For` header (`1.2.3.4, 1.2.3.5, ...`). Otherwise, the entire header is parsed as an IP.
 
 The first valid IP retrieved is written to the configured destination headers.
 
@@ -15,12 +15,12 @@ experimental:
   plugins:
     realip:
       moduleName: github.com/Desuuuu/traefik-real-ip-plugin
-      version: v1.0.1
+      version: v1.1.0
 ```
 
 ## Dynamic configuration
 
-### Trusted CIDRs
+### Depth
 
 ```yaml
 http:
@@ -30,13 +30,12 @@ http:
         realip:
           retrievers:
             - header: X-Forwarded-For
-              proxyCIDRs:
-                - "203.0.113.195/24"
+              depth: 1
           headers:
             - X-Real-IP
 ```
 
-### Trusted count
+### Excluded CIDRs
 
 ```yaml
 http:
@@ -46,7 +45,8 @@ http:
         realip:
           retrievers:
             - header: X-Forwarded-For
-              proxyCount: 1
+              excludedCIDRs:
+                - "203.0.113.195/24"
           headers:
             - X-Real-IP
 ```

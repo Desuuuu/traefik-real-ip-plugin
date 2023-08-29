@@ -6,7 +6,7 @@ import: github.com/Desuuuu/traefik-real-ip-plugin
 testData:
   retrievers:
     - header: X-Forwarded-For
-      proxyCIDRs:
+      excludedCIDRs:
         - "203.0.113.195/24"
   headers:
     - X-Real-IP

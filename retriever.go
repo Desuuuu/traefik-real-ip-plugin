@@ -3,6 +3,7 @@ package traefik_real_ip_plugin
 import (
 	"net"
 	"net/http"
+	"strconv"
 	"strings"
 )
 
@@ -28,13 +29,13 @@ func (r *HeaderRetriever) Retrieve(headers http.Header) net.IP {
 	return nil
 }
 
-type ProxyCountRetriever struct {
+type DepthRetriever struct {
 	Header string
-	Count  int
+	Depth  int
 }
 
-func (r *ProxyCountRetriever) Retrieve(headers http.Header) net.IP {
-	if r.Count < 1 {
+func (r *DepthRetriever) Retrieve(headers http.Header) net.IP {
+	if r.Depth < 1 {
 		return nil
 	}
 
@@ -45,7 +46,7 @@ func (r *ProxyCountRetriever) Retrieve(headers http.Header) net.IP {
 
 		list := strings.Split(value, ",")
 
-		i := len(list) - r.Count
+		i := len(list) - r.Depth
 		if i < 0 {
 			continue
 		}
@@ -58,12 +59,12 @@ func (r *ProxyCountRetriever) Retrieve(headers http.Header) net.IP {
 	return nil
 }
 
-type ProxyCIDRRetriever struct {
+type ExcludedCIDRRetriever struct {
 	Header string
 	CIDRs  []*net.IPNet
 }
 
-func (r *ProxyCIDRRetriever) Retrieve(headers http.Header) net.IP {
+func (r *ExcludedCIDRRetriever) Retrieve(headers http.Header) net.IP {
 	for _, value := range headers.Values(r.Header) {
 		if value == "" {
 			continue

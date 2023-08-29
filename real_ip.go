@@ -9,9 +9,9 @@ import (
 )
 
 type RetrieverConfig struct {
-	Header     string   `json:"header"`
-	ProxyCIDRs []string `json:"proxyCIDRs,omitempty"`
-	ProxyCount int      `json:"proxyCount,omitempty"`
+	Header        string   `json:"header"`
+	Depth         int      `json:"depth,omitempty"`
+	ExcludedCIDRs []string `json:"excludedCIDRs,omitempty"`
 }
 
 type Config struct {
@@ -50,10 +50,15 @@ func New(ctx context.Context, next http.Handler, config *Config, name string) (h
 		}
 
 		switch {
-		case len(rc.ProxyCIDRs) > 0:
-			cidrs := make([]*net.IPNet, 0, len(rc.ProxyCIDRs))
+		case rc.Depth > 0:
+			ri.retrievers = append(ri.retrievers, &DepthRetriever{
+				Header: rc.Header,
+				Depth:  rc.Depth,
+			})
+		case len(rc.ExcludedCIDRs) > 0:
+			cidrs := make([]*net.IPNet, 0, len(rc.ExcludedCIDRs))
 
-			for _, c := range rc.ProxyCIDRs {
+			for _, c := range rc.ExcludedCIDRs {
 				_, cidr, err := net.ParseCIDR(c)
 				if err != nil {
 					return nil, fmt.Errorf("invalid CIDR: %w", err)
@@ -62,14 +67,9 @@ func New(ctx context.Context, next http.Handler, config *Config, name string) (h
 				cidrs = append(cidrs, cidr)
 			}
 
-			ri.retrievers = append(ri.retrievers, &ProxyCIDRRetriever{
+			ri.retrievers = append(ri.retrievers, &ExcludedCIDRRetriever{
 				Header: rc.Header,
 				CIDRs:  cidrs,
-			})
-		case rc.ProxyCount > 0:
-			ri.retrievers = append(ri.retrievers, &ProxyCountRetriever{
-				Header: rc.Header,
-				Count:  rc.ProxyCount,
 			})
 		default:
 			ri.retrievers = append(ri.retrievers, &HeaderRetriever{
