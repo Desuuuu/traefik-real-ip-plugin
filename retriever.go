@@ -20,7 +20,7 @@ func (r *HeaderRetriever) Retrieve(headers http.Header) net.IP {
 			continue
 		}
 
-		if ip := net.ParseIP(strings.TrimSpace(value)); ip != nil {
+		if ip := parseIP(value); ip != nil {
 			return ip
 		}
 	}
@@ -50,7 +50,7 @@ func (r *ProxyCountRetriever) Retrieve(headers http.Header) net.IP {
 			continue
 		}
 
-		if ip := net.ParseIP(strings.TrimSpace(list[i])); ip != nil {
+		if ip := parseIP(list[i]); ip != nil {
 			return ip
 		}
 	}
@@ -72,7 +72,7 @@ func (r *ProxyCIDRRetriever) Retrieve(headers http.Header) net.IP {
 		list := strings.Split(value, ",")
 
 		for i := len(list) - 1; i >= 0; i-- {
-			ip := net.ParseIP(strings.TrimSpace(list[i]))
+			ip := parseIP(list[i])
 			if ip == nil {
 				break
 			}
@@ -93,4 +93,17 @@ func (r *ProxyCIDRRetriever) Retrieve(headers http.Header) net.IP {
 	}
 
 	return nil
+}
+
+func parseIP(str string) net.IP {
+	str = strings.TrimSpace(str)
+
+	if host, port, err := net.SplitHostPort(str); err == nil {
+		p, err := strconv.ParseInt(port, 10, 64)
+		if err == nil && p >= 0 && p <= 65535 {
+			str = host
+		}
+	}
+
+	return net.ParseIP(str)
 }
